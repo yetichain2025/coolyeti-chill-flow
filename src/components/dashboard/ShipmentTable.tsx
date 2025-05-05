@@ -15,7 +15,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 const shipments = [
   {
     id: 'SH-12345',
-    destination: 'Chicago Cold Storage',
+    destination: 'Jakarta Cold Storage',
     product: 'Frozen Seafood',
     temperature: -18.2,
     departureDate: '2025-05-05',
@@ -24,7 +24,7 @@ const shipments = [
   },
   {
     id: 'SH-12346',
-    destination: 'Detroit Distribution',
+    destination: 'Medan Distribution',
     product: 'Dairy Products',
     temperature: 2.1,
     departureDate: '2025-05-04',
@@ -33,7 +33,7 @@ const shipments = [
   },
   {
     id: 'SH-12347',
-    destination: 'Milwaukee Market',
+    destination: 'Surabaya Market',
     product: 'Vaccines',
     temperature: 3.2,
     departureDate: '2025-05-05',
@@ -42,7 +42,7 @@ const shipments = [
   },
   {
     id: 'SH-12348',
-    destination: 'Madison Medical',
+    destination: 'Makassar Medical',
     product: 'Pharmaceuticals',
     temperature: 2.9,
     departureDate: '2025-05-05',
