@@ -51,7 +51,7 @@ const shipments = [
   },
   {
     id: 'SH-12349',
-    destination: 'Toronto Cold Chain',
+    destination: 'Batam Cold Chain',
     product: 'Fresh Produce',
     temperature: 3.5,
     departureDate: '2025-05-03',
