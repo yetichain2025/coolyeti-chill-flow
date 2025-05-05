@@ -56,11 +56,21 @@ export function AppSidebar() {
         <div className="flex items-center gap-2">
           {!collapsed && (
             <div className="flex items-center gap-2">
-              <Thermometer className="h-6 w-6 text-coolyeti-500" />
+              <img 
+                src="/lovable-uploads/840ddef4-8125-416e-96d5-49afe5725670.png" 
+                alt="Frosty Yeti Logo" 
+                className="h-8 w-8"
+              />
               <span className="text-lg font-bold">CoolYeti</span>
             </div>
           )}
-          {collapsed && <Thermometer className="h-6 w-6 text-coolyeti-500 mx-auto" />}
+          {collapsed && (
+            <img 
+              src="/lovable-uploads/840ddef4-8125-416e-96d5-49afe5725670.png" 
+              alt="Frosty Yeti Logo" 
+              className="h-6 w-6 mx-auto"
+            />
+          )}
         </div>
         <Button
           className="ml-auto"
