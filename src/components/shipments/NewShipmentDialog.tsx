@@ -97,9 +97,10 @@ export function NewShipmentDialog({ open, onOpenChange, onShipmentAdded }: NewSh
         status: values.status,
       };
       
+      // Fix: Pass the data object directly, not as an array element
       const { error } = await supabase
         .from("shipments")
-        .insert([{ ...newShipmentData, user_id: user.id }]);
+        .insert({ ...newShipmentData, user_id: user.id });
         
       if (error) throw error;
       

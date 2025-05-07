@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
@@ -9,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { ShipmentList } from "@/components/shipments/ShipmentList";
 import { NewShipmentDialog } from "@/components/shipments/NewShipmentDialog";
-import { useToast } from "@/components/ui/sonner";
+import { useToast } from "@/hooks/use-toast";
 
 const fetchShipments = async () => {
   const { data, error } = await supabase
