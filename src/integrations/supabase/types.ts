@@ -72,6 +72,44 @@ export type Database = {
         }
         Relationships: []
       }
+      temperature_logs: {
+        Row: {
+          device_id: string | null
+          id: string
+          is_alert: boolean | null
+          location: string | null
+          recorded_at: string
+          shipment_id: string
+          temperature: number
+        }
+        Insert: {
+          device_id?: string | null
+          id?: string
+          is_alert?: boolean | null
+          location?: string | null
+          recorded_at?: string
+          shipment_id: string
+          temperature: number
+        }
+        Update: {
+          device_id?: string | null
+          id?: string
+          is_alert?: boolean | null
+          location?: string | null
+          recorded_at?: string
+          shipment_id?: string
+          temperature?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "temperature_logs_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["shipment_id"]
+          },
+        ]
+      }
       temperature_reading: {
         Row: {
           id: string

@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { ShipmentList } from "@/components/shipments/ShipmentList";
 import { NewShipmentDialog } from "@/components/shipments/NewShipmentDialog";
 import { useToast } from "@/hooks/use-toast";
+import { AddTemperatureReading } from "@/components/shipments/AddTemperatureReading";
+import { ShipmentType } from "@/types/shipment";
 
 const fetchShipments = async () => {
   const { data, error } = await supabase
@@ -25,6 +27,7 @@ const fetchShipments = async () => {
 
 const Shipments = () => {
   const [isNewShipmentDialogOpen, setIsNewShipmentDialogOpen] = useState(false);
+  const [selectedShipment, setSelectedShipment] = useState<ShipmentType | null>(null);
   const { toast } = useToast();
 
   const { 
@@ -56,6 +59,14 @@ const Shipments = () => {
     });
   };
 
+  const handleTemperatureAdded = () => {
+    refetch();
+    toast({
+      title: "Temperature recorded",
+      description: "The temperature reading has been recorded successfully.",
+    });
+  };
+
   return (
     <div className="min-h-screen bg-muted/40 flex">
       <AppSidebar />
@@ -75,17 +86,48 @@ const Shipments = () => {
             </Button>
           </div>
           
-          <Card>
-            <CardHeader>
-              <CardTitle>All Shipments</CardTitle>
-              <CardDescription>
-                View and manage all your cold chain shipments
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ShipmentList shipments={shipments || []} isLoading={isLoading} />
-            </CardContent>
-          </Card>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card className="md:col-span-2">
+              <CardHeader>
+                <CardTitle>All Shipments</CardTitle>
+                <CardDescription>
+                  View and manage all your cold chain shipments
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ShipmentList 
+                  shipments={shipments || []} 
+                  isLoading={isLoading} 
+                  onSelectShipment={setSelectedShipment}
+                />
+              </CardContent>
+            </Card>
+            
+            <div className="space-y-6">
+              {selectedShipment && (
+                <AddTemperatureReading 
+                  shipmentId={selectedShipment.shipment_id} 
+                  onReadingAdded={handleTemperatureAdded}
+                />
+              )}
+              
+              {!selectedShipment && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Temperature Management</CardTitle>
+                    <CardDescription>
+                      Select a shipment to record temperature readings
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="text-center py-8">
+                    <p className="text-muted-foreground">
+                      Select a shipment from the list to record or view temperature readings
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </div>
         </main>
       </div>
       <NewShipmentDialog 

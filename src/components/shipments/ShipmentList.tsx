@@ -18,10 +18,11 @@ import { useState } from "react";
 interface ShipmentListProps {
   shipments: ShipmentType[];
   isLoading: boolean;
+  onSelectShipment?: (shipment: ShipmentType) => void;
 }
 
-export function ShipmentList({ shipments, isLoading }: ShipmentListProps) {
-  const [selectedShipment, setSelectedShipment] = useState<ShipmentType | null>(null);
+export function ShipmentList({ shipments, isLoading, onSelectShipment }: ShipmentListProps) {
+  const [detailsShipment, setDetailsShipment] = useState<ShipmentType | null>(null);
 
   if (isLoading) {
     return <ShipmentListSkeleton />;
@@ -34,6 +35,12 @@ export function ShipmentList({ shipments, isLoading }: ShipmentListProps) {
       </div>
     );
   }
+
+  const handleShipmentSelect = (shipment: ShipmentType) => {
+    if (onSelectShipment) {
+      onSelectShipment(shipment);
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -82,7 +89,11 @@ export function ShipmentList({ shipments, isLoading }: ShipmentListProps) {
           </TableHeader>
           <TableBody>
             {shipments.map((shipment) => (
-              <TableRow key={shipment.id}>
+              <TableRow 
+                key={shipment.id} 
+                className="cursor-pointer hover:bg-muted" 
+                onClick={() => handleShipmentSelect(shipment)}
+              >
                 <TableCell className="font-medium">{shipment.shipment_id}</TableCell>
                 <TableCell>{shipment.destination}</TableCell>
                 <TableCell>{shipment.product}</TableCell>
@@ -106,7 +117,10 @@ export function ShipmentList({ shipments, isLoading }: ShipmentListProps) {
                   {shipment.estimated_arrival ? format(new Date(shipment.estimated_arrival), "MMM d, yyyy") : "N/A"}
                 </TableCell>
                 <TableCell className="text-right">
-                  <Button variant="ghost" size="sm" onClick={() => setSelectedShipment(shipment)}>
+                  <Button variant="ghost" size="sm" onClick={(e) => {
+                    e.stopPropagation();
+                    setDetailsShipment(shipment);
+                  }}>
                     Details
                   </Button>
                 </TableCell>
@@ -117,9 +131,9 @@ export function ShipmentList({ shipments, isLoading }: ShipmentListProps) {
       </div>
       
       <ShipmentDetails 
-        shipment={selectedShipment} 
-        open={!!selectedShipment} 
-        onOpenChange={(open) => !open && setSelectedShipment(null)} 
+        shipment={detailsShipment} 
+        open={!!detailsShipment} 
+        onOpenChange={(open) => !open && setDetailsShipment(null)} 
       />
     </>
   );
