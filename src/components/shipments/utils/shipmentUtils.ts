@@ -11,6 +11,8 @@ export async function createShipment(values: ShipmentFormValues, userId: string)
     estimated_arrival: values.estimated_arrival ? values.estimated_arrival.toISOString() : null,
     status: values.status,
     user_id: userId,
+    // Generate a temporary ID that will be replaced by the database trigger
+    shipment_id: `SH-${Math.random().toString(36).substr(2, 5)}`
   };
   
   const { data, error } = await supabase
