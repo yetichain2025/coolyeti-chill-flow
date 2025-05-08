@@ -5,13 +5,8 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTabs,
-  DialogTab,
-  TabsContent,
-  Tabs,
-  TabsList,
-  TabsTrigger
 } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
 import { ShipmentType } from "@/types/shipment";
 import { Thermometer, MapPin, Package, Calendar, Clock } from "lucide-react";
