@@ -23,3 +23,47 @@ export async function createShipment(values: ShipmentFormValues, userId: string)
   
   return data;
 }
+
+export async function addTemperatureReading(
+  shipmentId: string, 
+  temperature: number, 
+  options?: { 
+    device_id?: string; 
+    location?: string; 
+  }
+) {
+  const { data, error } = await supabase.from("temperature_logs").insert({
+    shipment_id: shipmentId,
+    temperature,
+    device_id: options?.device_id || null,
+    location: options?.location || null,
+  });
+  
+  if (error) throw error;
+  
+  return data;
+}
+
+export async function getShipmentTemperatureHistory(shipmentId: string) {
+  const { data, error } = await supabase
+    .from("temperature_logs")
+    .select("*")
+    .eq("shipment_id", shipmentId)
+    .order("recorded_at", { ascending: false });
+    
+  if (error) throw error;
+  
+  return data;
+}
+
+export async function getShipmentDetails(shipmentId: string) {
+  const { data, error } = await supabase
+    .from("shipments")
+    .select("*")
+    .eq("shipment_id", shipmentId)
+    .single();
+    
+  if (error) throw error;
+  
+  return data;
+}

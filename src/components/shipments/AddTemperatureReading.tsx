@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -16,6 +16,8 @@ import {
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { AlertCircle, CheckCircle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface AddTemperatureReadingProps {
   shipmentId: string;
@@ -38,6 +40,11 @@ type TemperatureFormValues = z.infer<typeof temperatureFormSchema>;
 
 export function AddTemperatureReading({ shipmentId, onReadingAdded }: AddTemperatureReadingProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [lastReading, setLastReading] = useState<{
+    temperature: number;
+    is_alert: boolean | null;
+    timestamp: string;
+  } | null>(null);
   const { toast } = useToast();
 
   const form = useForm<TemperatureFormValues>({
@@ -48,6 +55,61 @@ export function AddTemperatureReading({ shipmentId, onReadingAdded }: AddTempera
       location: "",
     },
   });
+
+  // Fetch the most recent temperature reading for this shipment
+  useEffect(() => {
+    if (!shipmentId) return;
+
+    const fetchLastReading = async () => {
+      const { data, error } = await supabase
+        .from("temperature_logs")
+        .select("temperature, is_alert, recorded_at")
+        .eq("shipment_id", shipmentId)
+        .order("recorded_at", { ascending: false })
+        .limit(1);
+
+      if (!error && data && data.length > 0) {
+        setLastReading({
+          temperature: data[0].temperature,
+          is_alert: data[0].is_alert,
+          timestamp: data[0].recorded_at
+        });
+      }
+    };
+
+    fetchLastReading();
+
+    // Set up real-time subscription for new temperature readings
+    const channel = supabase
+      .channel('latest-temp-reading')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'temperature_logs',
+          filter: `shipment_id=eq.${shipmentId}`
+        },
+        (payload) => {
+          const newReading = payload.new as {
+            temperature: number;
+            is_alert: boolean;
+            recorded_at: string;
+          };
+          
+          setLastReading({
+            temperature: newReading.temperature,
+            is_alert: newReading.is_alert,
+            timestamp: newReading.recorded_at
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [shipmentId]);
 
   async function onSubmit(values: TemperatureFormValues) {
     if (!shipmentId) return;
@@ -95,7 +157,37 @@ export function AddTemperatureReading({ shipmentId, onReadingAdded }: AddTempera
           Record a new temperature reading for this shipment
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-4">
+        {lastReading && (
+          <div className="mb-4">
+            <p className="text-sm font-medium">Last recorded temperature:</p>
+            <div className="flex items-center gap-2 mt-1">
+              <span 
+                className={`text-lg font-bold ${
+                  lastReading.is_alert 
+                    ? "text-red-600" 
+                    : "text-green-600"
+                }`}
+              >
+                {lastReading.temperature}°C
+              </span>
+              <span className="text-xs text-muted-foreground">
+                {new Date(lastReading.timestamp).toLocaleString()}
+              </span>
+            </div>
+            
+            {lastReading.is_alert && (
+              <Alert variant="destructive" className="mt-2">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Temperature Alert</AlertTitle>
+                <AlertDescription>
+                  This reading exceeds the acceptable temperature range for this shipment.
+                </AlertDescription>
+              </Alert>
+            )}
+          </div>
+        )}
+      
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField

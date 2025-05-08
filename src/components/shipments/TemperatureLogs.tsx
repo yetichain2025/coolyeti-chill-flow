@@ -17,8 +17,9 @@ import {
   ThermometerIcon 
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { TemperatureChart } from "@/components/dashboard/TemperatureChart";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { useToast } from "@/hooks/use-toast";
 
 interface TemperatureLog {
   id: string;
@@ -36,6 +37,9 @@ interface TemperatureLogsProps {
 }
 
 export function TemperatureLogs({ shipmentId, targetTemperature }: TemperatureLogsProps) {
+  const [logs, setLogs] = useState<TemperatureLog[]>([]);
+  const { toast } = useToast();
+  
   const fetchTemperatureLogs = async () => {
     const { data, error } = await supabase
       .from("temperature_logs")
@@ -58,7 +62,47 @@ export function TemperatureLogs({ shipmentId, targetTemperature }: TemperatureLo
     queryKey: ["temperature-logs", shipmentId],
     queryFn: fetchTemperatureLogs,
     enabled: !!shipmentId,
+    onSuccess: (data) => {
+      setLogs(data);
+    }
   });
+
+  // Set up real-time subscription
+  useEffect(() => {
+    if (!shipmentId) return;
+
+    const channel = supabase
+      .channel('temp-logs-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'temperature_logs',
+          filter: `shipment_id=eq.${shipmentId}`
+        },
+        (payload) => {
+          const newLog = payload.new as TemperatureLog;
+          
+          // Add the new log to the state
+          setLogs(prevLogs => [newLog, ...prevLogs]);
+          
+          // Show alert notification if temperature deviation is critical
+          if (newLog.is_alert) {
+            toast({
+              title: "Temperature Alert!",
+              description: `Temperature reading of ${newLog.temperature}°C exceeds threshold for shipment ${shipmentId}`,
+              variant: "destructive",
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [shipmentId, toast]);
 
   if (isLoading) {
     return <TemperatureLogsSkeleton />;
@@ -73,7 +117,9 @@ export function TemperatureLogs({ shipmentId, targetTemperature }: TemperatureLo
     );
   }
 
-  if (temperatureLogs?.length === 0) {
+  const currentLogs = logs.length > 0 ? logs : temperatureLogs || [];
+
+  if (currentLogs.length === 0) {
     return (
       <div className="p-6 text-center border border-dashed rounded-md bg-muted/20">
         <ThermometerIcon className="mx-auto h-12 w-12 text-muted-foreground" />
@@ -86,15 +132,16 @@ export function TemperatureLogs({ shipmentId, targetTemperature }: TemperatureLo
   }
 
   // Format data for chart
-  const chartData = temperatureLogs ? 
-    temperatureLogs
-      .slice()
-      .reverse()
-      .map(log => ({
-        time: format(new Date(log.recorded_at), "HH:mm"),
-        temperature: log.temperature,
-        date: format(new Date(log.recorded_at), "MMM dd"),
-      })) : [];
+  const chartData = currentLogs
+    .slice()
+    .reverse()
+    .slice(-20) // Just take last 20 readings for chart clarity
+    .map(log => ({
+      time: format(new Date(log.recorded_at), "HH:mm"),
+      temperature: log.temperature,
+      date: format(new Date(log.recorded_at), "MMM dd"),
+      alert: log.is_alert,
+    }));
       
   return (
     <div className="space-y-6">
@@ -108,7 +155,7 @@ export function TemperatureLogs({ shipmentId, targetTemperature }: TemperatureLo
         <CardContent>
           {chartData.length > 0 && (
             <div className="h-72 w-full">
-              <TemperatureHistoryChart 
+              <TemperatureChart 
                 data={chartData} 
                 targetTemperature={targetTemperature} 
               />
@@ -129,8 +176,8 @@ export function TemperatureLogs({ shipmentId, targetTemperature }: TemperatureLo
             </TableRow>
           </TableHeader>
           <TableBody>
-            {temperatureLogs?.map((log) => (
-              <TableRow key={log.id}>
+            {currentLogs.map((log) => (
+              <TableRow key={log.id} className={log.is_alert ? "bg-red-50 dark:bg-red-900/20" : ""}>
                 <TableCell>
                   {format(new Date(log.recorded_at), "MMM d, yyyy HH:mm")}
                 </TableCell>
@@ -161,15 +208,50 @@ export function TemperatureLogs({ shipmentId, targetTemperature }: TemperatureLo
   );
 }
 
-function TemperatureHistoryChart({ data, targetTemperature }: { data: any[], targetTemperature: number }) {
+function TemperatureChart({ data, targetTemperature }: { data: any[], targetTemperature: number }) {
   return (
-    <div className="h-full w-full">
-      {/* Use the data from the logs to render a chart */}
-      {/* This is a placeholder - you would implement an actual chart here */}
-      <div className="h-full flex items-center justify-center border rounded">
-        <p className="text-muted-foreground">Temperature chart visualization goes here</p>
-      </div>
-    </div>
+    <ResponsiveContainer width="100%" height="100%">
+      <LineChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis dataKey="time" />
+        <YAxis />
+        <Tooltip 
+          formatter={(value: number) => `${value}°C`} 
+          labelFormatter={(label) => `Time: ${label}`}
+        />
+        <ReferenceLine 
+          y={targetTemperature} 
+          stroke="green" 
+          strokeDasharray="3 3" 
+          label={{ value: 'Target', position: 'left' }} 
+        />
+        <ReferenceLine 
+          y={targetTemperature + 3} 
+          stroke="red" 
+          strokeDasharray="3 3" 
+          label={{ value: 'Upper Limit', position: 'right' }} 
+        />
+        <ReferenceLine 
+          y={targetTemperature - 3} 
+          stroke="red" 
+          strokeDasharray="3 3" 
+          label={{ value: 'Lower Limit', position: 'left' }} 
+        />
+        <Line 
+          type="monotone" 
+          dataKey="temperature" 
+          stroke="#0ea5e9" 
+          strokeWidth={2}
+          dot={{ stroke: '#0ea5e9', strokeWidth: 2, r: 4 }}
+          activeDot={{ 
+            stroke: '#0284c7', 
+            strokeWidth: 2, 
+            r: 6,
+            fill: (entry: any) => entry.alert ? '#ef4444' : '#0ea5e9'
+          }}
+        />
+      </LineChart>
+    </ResponsiveContainer>
   );
 }
 

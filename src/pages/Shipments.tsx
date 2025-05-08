@@ -12,6 +12,8 @@ import { NewShipmentDialog } from "@/components/shipments/NewShipmentDialog";
 import { useToast } from "@/hooks/use-toast";
 import { AddTemperatureReading } from "@/components/shipments/AddTemperatureReading";
 import { ShipmentType } from "@/types/shipment";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 const fetchShipments = async () => {
   const { data, error } = await supabase
@@ -28,6 +30,7 @@ const fetchShipments = async () => {
 const Shipments = () => {
   const [isNewShipmentDialogOpen, setIsNewShipmentDialogOpen] = useState(false);
   const [selectedShipment, setSelectedShipment] = useState<ShipmentType | null>(null);
+  const [temperatureAlerts, setTemperatureAlerts] = useState<ShipmentType[]>([]);
   const { toast } = useToast();
 
   const { 
@@ -49,6 +52,55 @@ const Shipments = () => {
       });
     }
   }, [error, toast]);
+  
+  // Set up real-time subscription for temperature updates on shipments
+  useEffect(() => {
+    const channel = supabase
+      .channel('shipments-temperature-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'shipments',
+        },
+        (payload) => {
+          const updatedShipment = payload.new as ShipmentType;
+          
+          // Only process temperature updates
+          if (payload.old.current_temperature !== updatedShipment.current_temperature) {
+            // Check for temperature alerts
+            if (Math.abs(updatedShipment.current_temperature - updatedShipment.target_temperature) > 3) {
+              setTemperatureAlerts(prev => {
+                // Don't add duplicate alerts
+                if (!prev.some(s => s.shipment_id === updatedShipment.shipment_id)) {
+                  toast({
+                    title: "Temperature Alert",
+                    description: `Shipment ${updatedShipment.shipment_id} temperature is out of range!`,
+                    variant: "destructive",
+                  });
+                  return [...prev, updatedShipment];
+                }
+                return prev;
+              });
+            } else {
+              // Remove from alerts if temperature is back in range
+              setTemperatureAlerts(prev => 
+                prev.filter(s => s.shipment_id !== updatedShipment.shipment_id)
+              );
+            }
+            
+            // Update the shipment in our local data
+            refetch();
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [refetch, toast]);
 
   const handleShipmentAdded = () => {
     refetch();
@@ -65,6 +117,10 @@ const Shipments = () => {
       title: "Temperature recorded",
       description: "The temperature reading has been recorded successfully.",
     });
+  };
+
+  const dismissAlert = (shipmentId: string) => {
+    setTemperatureAlerts(prev => prev.filter(s => s.shipment_id !== shipmentId));
   };
 
   return (
@@ -85,6 +141,30 @@ const Shipments = () => {
               New Shipment
             </Button>
           </div>
+          
+          {temperatureAlerts.length > 0 && (
+            <div className="space-y-3">
+              {temperatureAlerts.map(shipment => (
+                <Alert key={shipment.shipment_id} variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Temperature Alert</AlertTitle>
+                  <AlertDescription className="flex justify-between items-center">
+                    <div>
+                      Shipment {shipment.shipment_id} temperature is {shipment.current_temperature}°C, 
+                      which is outside the target of {shipment.target_temperature}°C (±3°C)
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => dismissAlert(shipment.shipment_id)}
+                    >
+                      Dismiss
+                    </Button>
+                  </AlertDescription>
+                </Alert>
+              ))}
+            </div>
+          )}
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card className="md:col-span-2">
