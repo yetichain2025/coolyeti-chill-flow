@@ -9,7 +9,89 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      shipments: {
+        Row: {
+          created_at: string
+          current_temperature: number | null
+          departure_date: string
+          destination: string
+          estimated_arrival: string | null
+          id: string
+          product: string
+          shipment_id: string
+          status: string
+          target_temperature: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_temperature?: number | null
+          departure_date: string
+          destination: string
+          estimated_arrival?: string | null
+          id?: string
+          product: string
+          shipment_id: string
+          status: string
+          target_temperature: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_temperature?: number | null
+          departure_date?: string
+          destination?: string
+          estimated_arrival?: string | null
+          id?: string
+          product?: string
+          shipment_id?: string
+          status?: string
+          target_temperature?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      temperature_logs: {
+        Row: {
+          device_id: string | null
+          id: string
+          is_alert: boolean | null
+          location: string | null
+          recorded_at: string
+          shipment_id: string
+          temperature: number
+        }
+        Insert: {
+          device_id?: string | null
+          id?: string
+          is_alert?: boolean | null
+          location?: string | null
+          recorded_at?: string
+          shipment_id: string
+          temperature: number
+        }
+        Update: {
+          device_id?: string | null
+          id?: string
+          is_alert?: boolean | null
+          location?: string | null
+          recorded_at?: string
+          shipment_id?: string
+          temperature?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "temperature_logs_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["shipment_id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

@@ -93,7 +93,7 @@ export function AddTemperatureReading({ shipmentId, onReadingAdded }: AddTempera
         (payload) => {
           const newReading = payload.new as {
             temperature: number;
-            is_alert: boolean;
+            is_alert: boolean | null;
             recorded_at: string;
           };
           
@@ -117,12 +117,14 @@ export function AddTemperatureReading({ shipmentId, onReadingAdded }: AddTempera
     setIsSubmitting(true);
     
     try {
-      const { error } = await supabase.from("temperature_logs").insert({
-        shipment_id: shipmentId,
-        temperature: values.temperature,
-        device_id: values.device_id || null,
-        location: values.location || null,
-      });
+      const { error } = await supabase
+        .from("temperature_logs")
+        .insert({
+          shipment_id: shipmentId,
+          temperature: values.temperature,
+          device_id: values.device_id || null,
+          location: values.location || null,
+        });
 
       if (error) throw error;
       

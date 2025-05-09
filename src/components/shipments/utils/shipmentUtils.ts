@@ -32,12 +32,14 @@ export async function addTemperatureReading(
     location?: string; 
   }
 ) {
-  const { data, error } = await supabase.from("temperature_logs").insert({
-    shipment_id: shipmentId,
-    temperature,
-    device_id: options?.device_id || null,
-    location: options?.location || null,
-  });
+  const { data, error } = await supabase
+    .from("temperature_logs")
+    .insert({
+      shipment_id: shipmentId,
+      temperature,
+      device_id: options?.device_id || null,
+      location: options?.location || null,
+    });
   
   if (error) throw error;
   

@@ -75,7 +75,9 @@ export function TemperatureChart({ data, targetTemperature }: TemperatureChartPr
             stroke: '#0284c7', 
             strokeWidth: 2, 
             r: 6,
-            fill: (entry: ChartDataPoint) => entry.alert ? '#ef4444' : '#0ea5e9'
+            fill: (entry) => {
+              return (entry as ChartDataPoint).alert ? '#ef4444' : '#0ea5e9';
+            }
           }}
         />
       </LineChart>

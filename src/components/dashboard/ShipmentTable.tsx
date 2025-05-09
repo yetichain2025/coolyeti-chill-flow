@@ -65,7 +65,7 @@ export function ShipmentTable() {
           </TableHeader>
           <TableBody>
             {displayShipments.map((shipment) => (
-              <TableRow key={shipment.id || shipment.shipment_id}>
+              <TableRow key={shipment.shipment_id}>
                 <TableCell className="font-medium">{shipment.shipment_id}</TableCell>
                 <TableCell>{shipment.destination}</TableCell>
                 <TableCell>{shipment.product}</TableCell>
@@ -85,7 +85,7 @@ export function ShipmentTable() {
                 <TableCell>{getETADisplay(shipment)}</TableCell>
                 <TableCell className="text-right">
                   <Button variant="ghost" size="sm" asChild>
-                    <Link to={`/shipments?id=${shipment.id || ''}`}>
+                    <Link to={`/shipments?id=${shipment.shipment_id || ''}`}>
                       Details
                     </Link>
                   </Button>
