@@ -9,170 +9,16 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      profiles: {
-        Row: {
-          full_name: string | null
-          id: string
-          role: string | null
-        }
-        Insert: {
-          full_name?: string | null
-          id: string
-          role?: string | null
-        }
-        Update: {
-          full_name?: string | null
-          id?: string
-          role?: string | null
-        }
-        Relationships: []
-      }
-      shipments: {
-        Row: {
-          created_at: string
-          current_temperature: number | null
-          departure_date: string
-          destination: string
-          estimated_arrival: string | null
-          id: string
-          product: string
-          shipment_id: string
-          status: Database["public"]["Enums"]["shipment_status"]
-          target_temperature: number
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          current_temperature?: number | null
-          departure_date: string
-          destination: string
-          estimated_arrival?: string | null
-          id?: string
-          product: string
-          shipment_id: string
-          status?: Database["public"]["Enums"]["shipment_status"]
-          target_temperature: number
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          current_temperature?: number | null
-          departure_date?: string
-          destination?: string
-          estimated_arrival?: string | null
-          id?: string
-          product?: string
-          shipment_id?: string
-          status?: Database["public"]["Enums"]["shipment_status"]
-          target_temperature?: number
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      temperature_logs: {
-        Row: {
-          device_id: string | null
-          id: string
-          is_alert: boolean | null
-          location: string | null
-          recorded_at: string
-          shipment_id: string
-          temperature: number
-        }
-        Insert: {
-          device_id?: string | null
-          id?: string
-          is_alert?: boolean | null
-          location?: string | null
-          recorded_at?: string
-          shipment_id: string
-          temperature: number
-        }
-        Update: {
-          device_id?: string | null
-          id?: string
-          is_alert?: boolean | null
-          location?: string | null
-          recorded_at?: string
-          shipment_id?: string
-          temperature?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "temperature_logs_shipment_id_fkey"
-            columns: ["shipment_id"]
-            isOneToOne: false
-            referencedRelation: "shipments"
-            referencedColumns: ["shipment_id"]
-          },
-        ]
-      }
-      temperature_reading: {
-        Row: {
-          id: string
-          location: string | null
-          timestamp: string
-          value: number
-        }
-        Insert: {
-          id: string
-          location?: string | null
-          timestamp: string
-          value: number
-        }
-        Update: {
-          id?: string
-          location?: string | null
-          timestamp?: string
-          value?: number
-        }
-        Relationships: []
-      }
-      user_roles: {
-        Row: {
-          created_at: string
-          id: string
-          role: Database["public"]["Enums"]["app_role"]
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          role?: Database["public"]["Enums"]["app_role"]
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          role?: Database["public"]["Enums"]["app_role"]
-          user_id?: string
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      has_role: {
-        Args: {
-          _user_id: string
-          _role: Database["public"]["Enums"]["app_role"]
-        }
-        Returns: boolean
-      }
+      [_ in never]: never
     }
     Enums: {
-      app_role: "admin" | "user"
-      shipment_status:
-        | "Scheduled"
-        | "In Transit"
-        | "Delayed"
-        | "Delivered"
-        | "Cancelled"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
@@ -287,15 +133,6 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {
-      app_role: ["admin", "user"],
-      shipment_status: [
-        "Scheduled",
-        "In Transit",
-        "Delayed",
-        "Delivered",
-        "Cancelled",
-      ],
-    },
+    Enums: {},
   },
 } as const
