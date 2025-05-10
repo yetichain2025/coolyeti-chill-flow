@@ -20,7 +20,7 @@ export function TemperatureFilters({ activeFilter, setActiveFilter }: Temperatur
         variant={activeFilter === "normal" ? "default" : "outline"} 
         size="sm"
         onClick={() => setActiveFilter("normal")}
-        className="text-green-600"
+        className={activeFilter === "normal" ? "" : "text-green-600"}
       >
         Normal
       </Button>
@@ -28,7 +28,7 @@ export function TemperatureFilters({ activeFilter, setActiveFilter }: Temperatur
         variant={activeFilter === "warning" ? "default" : "outline"} 
         size="sm"
         onClick={() => setActiveFilter("warning")}
-        className="text-amber-600"
+        className={activeFilter === "warning" ? "" : "text-amber-600"}
       >
         Warning
       </Button>
@@ -36,7 +36,7 @@ export function TemperatureFilters({ activeFilter, setActiveFilter }: Temperatur
         variant={activeFilter === "critical" ? "default" : "outline"} 
         size="sm"
         onClick={() => setActiveFilter("critical")}
-        className="text-red-600"
+        className={activeFilter === "critical" ? "" : "text-red-600"}
       >
         Critical
       </Button>

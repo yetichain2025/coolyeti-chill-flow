@@ -62,13 +62,13 @@ export function ShipmentTemperatureList({ shipments, isLoading, filter }: Shipme
             let status = "Normal";
             
             if (shipment.current_temperature !== null) {
-              const diff = Math.abs(shipment.current_temperature - shipment.target_temperature);
+              const diff = Math.abs((shipment.current_temperature || 0) - shipment.target_temperature);
               if (diff > 4) status = "Critical";
               else if (diff > 2) status = "Warning";
             }
             
             return (
-              <TableRow key={shipment.id}>
+              <TableRow key={shipment.id || shipment.shipment_id}>
                 <TableCell className="font-medium">{shipment.shipment_id}</TableCell>
                 <TableCell>{shipment.product}</TableCell>
                 <TableCell>

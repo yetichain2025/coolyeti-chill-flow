@@ -19,7 +19,7 @@ export function ShipmentTableRow({
 }: ShipmentTableRowProps) {
   return (
     <TableRow 
-      key={shipment.id} 
+      key={shipment.shipment_id} 
       className="cursor-pointer hover:bg-muted" 
       onClick={() => onSelect(shipment)}
     >
