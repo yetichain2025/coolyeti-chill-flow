@@ -5,10 +5,10 @@
 
 // Helper function for temperature class styling
 export function getTemperatureClass(current: number | null, target: number) {
-  if (current === null) return "";
+  if (current === null) return "text-gray-400";
   
   // Calculate acceptable range (±2 degrees from target)
-  const diff = Math.abs((current || 0) - target);
+  const diff = Math.abs(current - target);
   if (diff <= 2) {
     return "text-green-600";
   } else if (diff <= 4) {
@@ -19,7 +19,7 @@ export function getTemperatureClass(current: number | null, target: number) {
 }
 
 // Helper function to check if temperature is in alert range
-export function isTemperatureAlert(current: number, target: number): boolean {
+export function isTemperatureAlert(current: number | null, target: number): boolean {
   if (current === null) return false;
   return Math.abs(current - target) > 3;
 }

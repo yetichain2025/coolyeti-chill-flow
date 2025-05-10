@@ -2,16 +2,7 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { TemperatureLogsList } from "./temperature/TemperatureLogsList";
 import { TemperatureChart } from "./temperature/TemperatureChart";
@@ -32,7 +23,8 @@ export function TemperatureLogs({ shipmentId, targetTemperature }: TemperatureLo
   const { 
     data: temperatureLogs, 
     isLoading, 
-    error 
+    error,
+    refetch
   } = useQuery({
     queryKey: ["temperature-logs", shipmentId],
     queryFn: () => getShipmentTemperatureHistory(shipmentId),
@@ -73,6 +65,9 @@ export function TemperatureLogs({ shipmentId, targetTemperature }: TemperatureLo
               variant: "destructive",
             });
           }
+          
+          // Refetch to ensure all data is up-to-date
+          refetch();
         }
       )
       .subscribe();
@@ -80,7 +75,7 @@ export function TemperatureLogs({ shipmentId, targetTemperature }: TemperatureLo
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [shipmentId, toast]);
+  }, [shipmentId, toast, refetch]);
 
   if (isLoading) {
     return <TemperatureLogsLoading />;

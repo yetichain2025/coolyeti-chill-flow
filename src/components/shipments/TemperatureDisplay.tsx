@@ -8,13 +8,13 @@ interface TemperatureDisplayProps {
 
 export function TemperatureDisplay({ currentTemperature, targetTemperature }: TemperatureDisplayProps) {
   return (
-    <>
+    <div>
       <span className={getTemperatureClass(currentTemperature, targetTemperature)}>
         {formatTemperature(currentTemperature)}
       </span>
       <span className="text-xs text-muted-foreground block">
         Target: {targetTemperature}°C
       </span>
-    </>
+    </div>
   );
 }

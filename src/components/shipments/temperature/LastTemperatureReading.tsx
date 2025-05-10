@@ -5,6 +5,7 @@ import {
   AlertDescription, 
   AlertTitle 
 } from "@/components/ui/alert";
+import { getTemperatureClass, formatTemperature } from "@/utils/temperatureUtils";
 
 interface LastTemperatureReadingProps {
   lastReading: {
@@ -21,14 +22,8 @@ export function LastTemperatureReading({ lastReading }: LastTemperatureReadingPr
     <div className="mb-4">
       <p className="text-sm font-medium">Last recorded temperature:</p>
       <div className="flex items-center gap-2 mt-1">
-        <span 
-          className={`text-lg font-bold ${
-            lastReading.is_alert 
-              ? "text-red-600" 
-              : "text-green-600"
-          }`}
-        >
-          {lastReading.temperature}°C
+        <span className={`text-lg font-bold ${lastReading.is_alert ? "text-red-600" : "text-green-600"}`}>
+          {formatTemperature(lastReading.temperature)}
         </span>
         <span className="text-xs text-muted-foreground">
           {new Date(lastReading.timestamp).toLocaleString()}

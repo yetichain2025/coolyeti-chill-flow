@@ -3,6 +3,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { TemperatureFormValues } from "./temperatureFormSchema";
+import { isTemperatureAlert } from "@/utils/temperatureUtils";
 
 export function useTemperatureSubmit(shipmentId: string, onSuccess?: () => void) {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -14,6 +15,19 @@ export function useTemperatureSubmit(shipmentId: string, onSuccess?: () => void)
     setIsSubmitting(true);
     
     try {
+      // First, get the target temperature for this shipment
+      const { data: shipmentData, error: shipmentError } = await supabase
+        .from("shipments")
+        .select("target_temperature")
+        .eq("shipment_id", shipmentId)
+        .single();
+      
+      if (shipmentError) throw shipmentError;
+      
+      const targetTemperature = shipmentData.target_temperature;
+      const isAlert = isTemperatureAlert(values.temperature, targetTemperature);
+      
+      // Insert temperature log
       const { error } = await supabase
         .from("temperature_logs")
         .insert({
@@ -21,9 +35,19 @@ export function useTemperatureSubmit(shipmentId: string, onSuccess?: () => void)
           temperature: values.temperature,
           device_id: values.device_id || null,
           location: values.location || null,
+          is_alert: isAlert
         });
 
       if (error) throw error;
+      
+      // Update the current temperature on the shipment
+      await supabase
+        .from("shipments")
+        .update({
+          current_temperature: values.temperature,
+          updated_at: new Date().toISOString()
+        })
+        .eq("shipment_id", shipmentId);
       
       toast({
         title: "Temperature reading added",
