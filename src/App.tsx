@@ -1,49 +1,63 @@
 
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "@/contexts/AuthContext";
-import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+
 import Index from "./pages/Index";
-import Shipments from "./pages/Shipments";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import Shipments from "./pages/Shipments";
+import Temperature from "./pages/Temperature";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import { AuthProvider } from "./contexts/AuthContext";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      retry: 1,
+    },
+  },
+});
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <BrowserRouter>
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
+        <Router>
           <Routes>
             <Route path="/auth" element={<Auth />} />
-            <Route 
-              path="/" 
+            <Route
+              path="/"
               element={
                 <ProtectedRoute>
                   <Index />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/shipments" 
+            <Route
+              path="/shipments"
               element={
                 <ProtectedRoute>
                   <Shipments />
                 </ProtectedRoute>
-              } 
+              }
+            />
+            <Route
+              path="/temperature"
+              element={
+                <ProtectedRoute>
+                  <Temperature />
+                </ProtectedRoute>
+              }
             />
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </TooltipProvider>
+        </Router>
+        <Toaster />
       </AuthProvider>
-    </BrowserRouter>
-  </QueryClientProvider>
-);
+    </QueryClientProvider>
+  );
+}
 
 export default App;
