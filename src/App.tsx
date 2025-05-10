@@ -10,6 +10,7 @@ import Shipments from "./pages/Shipments";
 import Temperature from "./pages/Temperature";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { AuthProvider } from "./contexts/AuthContext";
+import { AppSidebar } from "./components/layout/AppSidebar";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -25,35 +26,52 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Router>
         <AuthProvider>
-          <Routes>
-            <Route path="/auth" element={<Auth />} />
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <Index />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/shipments"
-              element={
-                <ProtectedRoute>
-                  <Shipments />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/temperature"
-              element={
-                <ProtectedRoute>
-                  <Temperature />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          <Toaster />
+          <div className="flex h-screen">
+            <Routes>
+              <Route path="/auth" element={<Auth />} />
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <div className="flex w-full">
+                      <AppSidebar />
+                      <div className="flex-1 overflow-auto">
+                        <Index />
+                      </div>
+                    </div>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/shipments"
+                element={
+                  <ProtectedRoute>
+                    <div className="flex w-full">
+                      <AppSidebar />
+                      <div className="flex-1 overflow-auto">
+                        <Shipments />
+                      </div>
+                    </div>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/temperature"
+                element={
+                  <ProtectedRoute>
+                    <div className="flex w-full">
+                      <AppSidebar />
+                      <div className="flex-1 overflow-auto">
+                        <Temperature />
+                      </div>
+                    </div>
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+            <Toaster />
+          </div>
         </AuthProvider>
       </Router>
     </QueryClientProvider>
