@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ShipmentType } from "@/types/shipment";
 import { useToast } from "@/hooks/use-toast";
+import { isTemperatureAlert } from "@/utils/temperatureUtils";
 
 export function useTemperatureAlerts(refetch: () => void) {
   const [temperatureAlerts, setTemperatureAlerts] = useState<ShipmentType[]>([]);
@@ -24,8 +25,9 @@ export function useTemperatureAlerts(refetch: () => void) {
           
           // Only process temperature updates
           if (payload.old.current_temperature !== updatedShipment.current_temperature) {
-            // Check for temperature alerts
-            if (Math.abs(updatedShipment.current_temperature - updatedShipment.target_temperature) > 3) {
+            // Check for temperature alerts using our utility function
+            if (updatedShipment.current_temperature !== null && 
+                isTemperatureAlert(updatedShipment.current_temperature, updatedShipment.target_temperature)) {
               setTemperatureAlerts(prev => {
                 // Don't add duplicate alerts
                 if (!prev.some(s => s.shipment_id === updatedShipment.shipment_id)) {

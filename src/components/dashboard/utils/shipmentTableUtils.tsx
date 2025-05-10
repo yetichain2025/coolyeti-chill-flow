@@ -1,21 +1,6 @@
 
 import { ShipmentType } from "@/types/shipment";
 
-// Helper function for temperature class styling
-export function getTemperatureClass(current: number | null, target: number) {
-  if (current === null) return "";
-  
-  // Calculate acceptable range (±2 degrees from target)
-  const diff = Math.abs((current || 0) - target);
-  if (diff <= 2) {
-    return "text-green-600";
-  } else if (diff <= 4) {
-    return "text-amber-500";
-  } else {
-    return "text-red-500";
-  }
-}
-
 // Helper function for status badge styling
 export function getStatusColor(status: string) {
   switch (status) {

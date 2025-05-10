@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Link } from "react-router-dom";
 import { ShipmentType } from "@/types/shipment";
-import { getTemperatureClass, getStatusColor, getETADisplay } from "./utils/shipmentTableUtils";
+import { getStatusColor, getETADisplay } from "./utils/shipmentTableUtils";
+import { getTemperatureClass, formatTemperature } from "@/utils/temperatureUtils";
 
 interface ShipmentTableRowProps {
   shipment: ShipmentType | any;
@@ -18,7 +19,7 @@ export function ShipmentTableRow({ shipment }: ShipmentTableRowProps) {
       <TableCell>{shipment.product}</TableCell>
       <TableCell>
         <span className={getTemperatureClass(shipment.current_temperature, shipment.target_temperature)}>
-          {shipment.current_temperature !== null ? `${shipment.current_temperature}°C` : 'N/A'}
+          {formatTemperature(shipment.current_temperature)}
         </span>
       </TableCell>
       <TableCell>

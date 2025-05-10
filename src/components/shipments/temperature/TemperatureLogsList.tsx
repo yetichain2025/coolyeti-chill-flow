@@ -10,7 +10,7 @@ import {
   TableRow 
 } from "@/components/ui/table";
 import { TemperatureLog } from "../types/temperatureTypes";
-import { getTemperatureClass } from "../utils/temperatureUtils";
+import { getTemperatureClass } from "@/utils/temperatureUtils";
 
 interface TemperatureLogsListProps {
   logs: TemperatureLog[];
